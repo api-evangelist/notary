@@ -1,0 +1,52 @@
+aid: notary
+name: Notary Project
+description: >-
+  The Notary Project is a CNCF incubating set of specifications and tools
+  for signing and verifying container images and other OCI artifacts. It
+  provides Notation, a CLI and library for signing artifacts stored in
+  OCI-compliant registries. The project defines standards for signature
+  formats, trust policies, and verification workflows to secure software
+  supply chains.
+url: https://notaryproject.dev
+image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
+- Container Security
+- Image Signing
+- Verification
+- OCI
+- Cloud Native
+- Incubating
+created: '2026-03-16'
+modified: '2026-03-16'
+specificationVersion: '0.19'
+type: Index
+apis:
+- aid: notary:notary-spec
+  name: Notary Project Signing Specification
+  description: >-
+    The Notary Project specification defines the signature envelope format,
+    trust store and trust policy for container image signing and verification.
+    It supports multiple signature formats and integrates with OCI distribution
+    registries for storing signatures alongside container images. The
+    specification enables end-to-end supply chain security from build to
+    deployment.
+  humanURL: https://notaryproject.dev/docs/
+  properties:
+  - type: Documentation
+    url: https://notaryproject.dev/docs/
+  tags:
+  - Signing
+  - Verification
+  - Specification
+common:
+- type: Documentation
+  name: Notary Project Documentation
+  description: Official documentation for the Notary Project.
+  url: https://notaryproject.dev/docs/
+- type: GitHubOrg
+  name: Notary Project GitHub
+  description: Source code and specifications.
+  url: https://github.com/notaryproject
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com
