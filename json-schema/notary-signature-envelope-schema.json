@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/api-evangelist/notary/blob/main/json-schema/notary-signature-envelope-schema.json",
+  "title": "Notary Project JWS Signature Envelope",
+  "description": "JSON Schema for the Notary Project JWS (JSON Web Signature) signature envelope format. The JWS envelope wraps the artifact descriptor payload with cryptographic signatures and signing metadata. It uses the flattened JWS JSON serialization with exactly one signature per envelope. Signatures are stored in OCI registries as referrer artifacts alongside the signed container images or OCI artifacts.",
+  "type": "object",
+  "required": ["payload", "protected", "header", "signature"],
+  "properties": {
+    "payload": {
+      "type": "string",
+      "description": "Base64URL-encoded payload containing the Notary Project signature payload JSON. The payload includes the artifact descriptor (mediaType, digest, size) and the signed attributes.",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "protected": {
+      "type": "string",
+      "description": "Base64URL-encoded protected headers JSON object containing the critical signed attributes including the signing algorithm, certificate chain, content type, signing scheme, and signing time.",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "header": {
+      "$ref": "#/$defs/UnprotectedHeader"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Base64URL-encoded digital signature bytes produced by signing the ASCII(BASE64URL(protected) || '.' || BASE64URL(payload)) string with the signing key.",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    }
+  },
+  "$defs": {
+    "UnprotectedHeader": {
+      "type": "object",
+      "description": "The JWS unprotected header containing unsigned (non-integrity-protected) attributes. In the Notary Project JWS format, this holds the timestamp token and any plugin-supplied unsigned attributes.",
+      "properties": {
+        "io.cncf.notary.timestampSignature": {
+          "type": "string",
+          "description": "Base64-encoded RFC 3161 timestamp token providing a trusted signing time from a Timestamp Authority (TSA). Optional; used when the signing scheme is notary.x509.signingAuthority.",
+          "format": "byte"
+        },
+        "io.cncf.notary.signingAgent": {
+          "type": "string",
+          "description": "Optional identifier of the signing tool or plugin that created the signature (e.g., 'notation/1.0.0 notation-plugin/1.0.0')."
+        }
+      },
+      "additionalProperties": true
+    },
+    "ProtectedHeader": {
+      "type": "object",
+      "description": "The decoded Notary Project JWS protected header containing the critical signed attributes. This object is base64url-encoded as the 'protected' field of the JWS envelope.",
+      "required": ["alg", "cty", "io.cncf.notary.signingScheme"],
+      "properties": {
+        "alg": {
+          "type": "string",
+          "description": "The signing algorithm used, expressed as a JWA algorithm identifier.",
+          "enum": [
+            "PS256",
+            "PS384",
+            "PS512",
+            "ES256",
+            "ES384",
+            "ES512"
+          ]
+        },
+        "cty": {
+          "type": "string",
+          "description": "Content type identifying the Notary Project signature payload format and version.",
+          "const": "application/vnd.cncf.notary.payload.v1+json"
+        },
+        "x5c": {
+          "type": "array",
+          "description": "Ordered array of base64-encoded DER X.509 certificates forming the signing certificate chain. The first certificate is the leaf signing certificate.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64-encoded DER X.509 certificate."
+          }
+        },
+        "io.cncf.notary.signingScheme": {
+          "type": "string",
+          "description": "The signing scheme identifying the trust model used for this signature.",
+          "enum": [
+            "notary.x509",
+            "notary.x509.signingAuthority"
+          ]
+        },
+        "io.cncf.notary.signingTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time at which the signature was generated. For notary.x509 scheme, this is an unauthenticated claim; for notary.x509.signingAuthority scheme, this is authenticated by the TSA timestamp."
+        },
+        "io.cncf.notary.authenticSigningTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Authenticated signing time from the Timestamp Authority. Only present when the signing scheme is notary.x509.signingAuthority."
+        },
+        "io.cncf.notary.expiry": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional expiry time after which the signature should not be trusted for verification. RFC 3339 date-time string."
+        },
+        "crit": {
+          "type": "array",
+          "description": "List of critical header parameter names that verifiers must understand and process. All Notary Project extended attributes must be listed here.",
+          "items": {
+            "type": "string",
+            "description": "A critical header parameter name."
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "SignaturePayload": {
+      "type": "object",
+      "description": "The decoded Notary Project signature payload describing the OCI artifact being signed. This object is base64url-encoded as the 'payload' field of the JWS envelope.",
+      "required": ["targetArtifact"],
+      "properties": {
+        "targetArtifact": {
+          "$ref": "#/$defs/DescriptorWithAnnotations"
+        }
+      }
+    },
+    "DescriptorWithAnnotations": {
+      "type": "object",
+      "description": "An OCI descriptor identifying the artifact being signed, optionally with annotations providing additional metadata about the artifact.",
+      "required": ["mediaType", "digest", "size"],
+      "properties": {
+        "mediaType": {
+          "type": "string",
+          "description": "The media type of the signed OCI artifact (e.g., application/vnd.docker.distribution.manifest.v2+json or application/vnd.oci.image.manifest.v1+json).",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "description": "The digest of the signed OCI artifact in the format algorithm:hex (e.g., sha256:abc123...).",
+          "pattern": "^[a-z0-9]+:[a-fA-F0-9]+$"
+        },
+        "size": {
+          "type": "integer",
+          "description": "The size in bytes of the signed OCI artifact content.",
+          "minimum": 0
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Optional key-value annotations providing additional metadata about the signed artifact such as the image tag or repository URL.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "An annotation value string."
+          }
+        }
+      }
+    },
+    "SignatureManifest": {
+      "type": "object",
+      "description": "An OCI image manifest used to store a Notary Project signature in an OCI registry as a referrer artifact attached to the signed image manifest.",
+      "required": ["schemaVersion", "mediaType", "config", "layers", "subject"],
+      "properties": {
+        "schemaVersion": {
+          "type": "integer",
+          "description": "OCI manifest schema version, always 2.",
+          "const": 2
+        },
+        "mediaType": {
+          "type": "string",
+          "description": "Media type of the OCI manifest.",
+          "const": "application/vnd.oci.image.manifest.v1+json"
+        },
+        "config": {
+          "type": "object",
+          "description": "OCI config descriptor for the signature. Uses the Notary Project config media type with an empty JSON object payload.",
+          "properties": {
+            "mediaType": {
+              "type": "string",
+              "description": "Notary Project signature config media type.",
+              "const": "application/vnd.cncf.notary.signature"
+            },
+            "digest": {
+              "type": "string",
+              "description": "Digest of the empty config object."
+            },
+            "size": {
+              "type": "integer",
+              "description": "Size of the config object in bytes."
+            }
+          }
+        },
+        "layers": {
+          "type": "array",
+          "description": "Array containing exactly one layer: the signature envelope blob.",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "type": "object",
+            "description": "Descriptor for the signature envelope layer.",
+            "properties": {
+              "mediaType": {
+                "type": "string",
+                "description": "Media type of the signature envelope.",
+                "enum": [
+                  "application/jose+json",
+                  "application/cose"
+                ]
+              },
+              "digest": {
+                "type": "string",
+                "description": "Digest of the signature envelope blob."
+              },
+              "size": {
+                "type": "integer",
+                "description": "Size of the signature envelope blob in bytes."
+              }
+            }
+          }
+        },
+        "subject": {
+          "type": "object",
+          "description": "OCI descriptor of the artifact manifest that this signature references.",
+          "required": ["mediaType", "digest", "size"],
+          "properties": {
+            "mediaType": {
+              "type": "string",
+              "description": "Media type of the signed artifact manifest."
+            },
+            "digest": {
+              "type": "string",
+              "description": "Digest of the signed artifact manifest."
+            },
+            "size": {
+              "type": "integer",
+              "description": "Size of the signed artifact manifest in bytes."
+            }
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "description": "Annotations on the signature manifest including the Notary Project descriptor annotation.",
+          "properties": {
+            "io.cncf.notary.x509chain.thumbprint#S256": {
+              "type": "string",
+              "description": "JSON array of SHA-256 thumbprints of the leaf-to-root certificate chain in the signature, used as a quick lookup index."
+            }
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

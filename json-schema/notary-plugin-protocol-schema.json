@@ -1,0 +1,368 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/api-evangelist/notary/blob/main/json-schema/notary-plugin-protocol-schema.json",
+  "title": "Notary Project Plugin Protocol",
+  "description": "JSON Schema for the Notation plugin extensibility protocol. Notation plugins are executables that implement external key management and signing capabilities. Notation invokes plugins by passing a JSON request on stdin and reading the JSON response from stdout. Plugins must implement the get-plugin-metadata command and optionally implement signing (describe-key, generate-signature) and/or verification (generate-envelope, verify-signature) capability commands.",
+  "type": "object",
+  "$defs": {
+    "GetPluginMetadataRequest": {
+      "type": "object",
+      "description": "Request payload for the get-plugin-metadata command. Notation sends this to discover what capabilities and contract versions the plugin supports.",
+      "required": ["contractVersion"],
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "description": "The plugin contract version that Notation supports. The plugin should verify it supports this version.",
+          "pattern": "^\\d+\\.\\d+$"
+        }
+      }
+    },
+    "GetPluginMetadataResponse": {
+      "type": "object",
+      "description": "Response payload for the get-plugin-metadata command containing plugin identification and supported capabilities.",
+      "required": ["name", "description", "version", "url", "supportedContractVersions", "capabilities"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the plugin. Must match the plugin binary name suffix after 'notation-'.",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9\\-_]*$",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "description": {
+          "type": "string",
+          "description": "Human-readable description of the plugin and what key management or signing service it integrates with.",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic version of the plugin following the SemVer 2.0 specification (e.g., 1.0.0).",
+          "pattern": "^v?\\d+\\.\\d+\\.\\d+([-+].+)?$"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the plugin's documentation, homepage, or source repository."
+        },
+        "supportedContractVersions": {
+          "type": "array",
+          "description": "List of plugin contract versions this plugin supports. Must include at least one version.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "description": "A supported contract version string (e.g., '1.0').",
+            "pattern": "^\\d+\\.\\d+$"
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "description": "List of capabilities the plugin implements. Each capability requires implementing a specific set of commands. SIGNATURE_GENERATOR.RAW requires describe-key and generate-signature. SIGNATURE_VERIFIER.TRUSTED_IDENTITY and SIGNATURE_VERIFIER.REVOCATION_CHECK require verify-signature.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "description": "A capability identifier string.",
+            "enum": [
+              "SIGNATURE_GENERATOR.RAW",
+              "SIGNATURE_GENERATOR.ENVELOPE",
+              "SIGNATURE_VERIFIER.TRUSTED_IDENTITY",
+              "SIGNATURE_VERIFIER.REVOCATION_CHECK"
+            ]
+          }
+        }
+      }
+    },
+    "DescribeKeyRequest": {
+      "type": "object",
+      "description": "Request payload for the describe-key command. Notation sends this to learn the key specification (algorithm and size) for a given key ID so it can select the appropriate signature algorithm.",
+      "required": ["contractVersion", "keyId"],
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "description": "The plugin contract version being used for this invocation.",
+          "pattern": "^\\d+\\.\\d+$"
+        },
+        "keyId": {
+          "type": "string",
+          "description": "Plugin-specific identifier for the signing key. This is the value from the signing key configuration in Notation's keys.json.",
+          "minLength": 1
+        },
+        "pluginConfig": {
+          "type": "object",
+          "description": "Optional plugin-specific configuration key-value pairs passed from the signing key configuration.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Plugin configuration value."
+          }
+        }
+      }
+    },
+    "DescribeKeyResponse": {
+      "type": "object",
+      "description": "Response payload for the describe-key command containing the key specification for the requested key.",
+      "required": ["keyId", "keySpec"],
+      "properties": {
+        "keyId": {
+          "type": "string",
+          "description": "The key ID echoed from the request, confirming which key is being described."
+        },
+        "keySpec": {
+          "type": "string",
+          "description": "The key specification string identifying the key algorithm and size. Used by Notation to select the hash algorithm for signature generation.",
+          "enum": [
+            "RSA-2048",
+            "RSA-3072",
+            "RSA-4096",
+            "EC-256",
+            "EC-384",
+            "EC-521"
+          ]
+        }
+      }
+    },
+    "GenerateSignatureRequest": {
+      "type": "object",
+      "description": "Request payload for the generate-signature command. Notation sends the payload to be signed (the signature envelope payload bytes) and the plugin returns the raw signature bytes signed with the specified key.",
+      "required": ["contractVersion", "keyId", "keySpec", "hashAlgorithm", "payload"],
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "description": "The plugin contract version being used.",
+          "pattern": "^\\d+\\.\\d+$"
+        },
+        "keyId": {
+          "type": "string",
+          "description": "Plugin-specific identifier for the signing key to use.",
+          "minLength": 1
+        },
+        "keySpec": {
+          "type": "string",
+          "description": "Key specification of the signing key as returned by describe-key.",
+          "enum": [
+            "RSA-2048",
+            "RSA-3072",
+            "RSA-4096",
+            "EC-256",
+            "EC-384",
+            "EC-521"
+          ]
+        },
+        "hashAlgorithm": {
+          "type": "string",
+          "description": "Hash algorithm to use when generating the signature. Must be compatible with the key spec.",
+          "enum": [
+            "SHA-256",
+            "SHA-384",
+            "SHA-512"
+          ]
+        },
+        "payload": {
+          "type": "string",
+          "description": "Base64-encoded bytes of the data to be signed. This is the signature envelope payload as determined by Notation based on the signing algorithm.",
+          "format": "byte"
+        },
+        "pluginConfig": {
+          "type": "object",
+          "description": "Optional plugin-specific configuration key-value pairs.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Plugin configuration value."
+          }
+        }
+      }
+    },
+    "GenerateSignatureResponse": {
+      "type": "object",
+      "description": "Response payload for the generate-signature command containing the raw signature and certificate chain.",
+      "required": ["keyId", "signature", "signingAlgorithm", "certificateChain"],
+      "properties": {
+        "keyId": {
+          "type": "string",
+          "description": "The key ID echoed from the request."
+        },
+        "signature": {
+          "type": "string",
+          "description": "Base64-encoded raw signature bytes produced by signing the request payload with the specified key.",
+          "format": "byte"
+        },
+        "signingAlgorithm": {
+          "type": "string",
+          "description": "The signing algorithm used, expressed as a fully-qualified algorithm string matching the Notary Project signature specification.",
+          "enum": [
+            "RSASSA-PSS-SHA-256",
+            "RSASSA-PSS-SHA-384",
+            "RSASSA-PSS-SHA-512",
+            "ECDSA-SHA-256",
+            "ECDSA-SHA-384",
+            "ECDSA-SHA-512"
+          ]
+        },
+        "certificateChain": {
+          "type": "array",
+          "description": "Ordered array of base64-encoded DER-format X.509 certificates forming the signing certificate chain. The first certificate is the leaf signing certificate; subsequent certificates are intermediates and the root CA.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "byte",
+            "description": "Base64-encoded DER certificate bytes."
+          }
+        }
+      }
+    },
+    "VerifySignatureRequest": {
+      "type": "object",
+      "description": "Request payload for the verify-signature command sent to plugins that implement SIGNATURE_VERIFIER capabilities. Notation sends this for trusted identity validation and revocation checking.",
+      "required": ["contractVersion", "signature", "trustPolicy"],
+      "properties": {
+        "contractVersion": {
+          "type": "string",
+          "description": "The plugin contract version being used.",
+          "pattern": "^\\d+\\.\\d+$"
+        },
+        "signature": {
+          "type": "object",
+          "description": "The signature envelope being verified.",
+          "properties": {
+            "criticalAttributes": {
+              "type": "object",
+              "description": "Critical signed attributes from the signature envelope header.",
+              "properties": {
+                "contentType": {
+                  "type": "string",
+                  "description": "Content type of the signature payload."
+                },
+                "signingScheme": {
+                  "type": "string",
+                  "description": "The signing scheme used."
+                },
+                "signingTime": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "The time at which the signature was created."
+                },
+                "expiry": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Optional expiry time after which the signature is no longer valid."
+                }
+              }
+            },
+            "unprocessedAttributes": {
+              "type": "object",
+              "description": "Signed attributes not processed by Notation, passed to the plugin for validation.",
+              "additionalProperties": true
+            },
+            "certificateChain": {
+              "type": "array",
+              "description": "Certificate chain from the signature envelope for revocation checking.",
+              "items": {
+                "type": "string",
+                "format": "byte",
+                "description": "Base64-encoded DER certificate."
+              }
+            }
+          }
+        },
+        "trustPolicy": {
+          "type": "object",
+          "description": "The trust policy statement that matched this artifact, providing the plugin with policy context.",
+          "properties": {
+            "trustedIdentities": {
+              "type": "array",
+              "description": "List of trusted identity patterns from the matching trust policy statement.",
+              "items": {
+                "type": "string",
+                "description": "A trusted identity string (e.g., x509.subject: CN=...)."
+              }
+            },
+            "signatureVerification": {
+              "type": "object",
+              "description": "Signature verification configuration from the trust policy.",
+              "properties": {
+                "level": {
+                  "type": "string",
+                  "description": "Verification level (strict, permissive, audit, skip)."
+                }
+              }
+            }
+          }
+        },
+        "pluginConfig": {
+          "type": "object",
+          "description": "Optional plugin-specific configuration key-value pairs.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "VerifySignatureResponse": {
+      "type": "object",
+      "description": "Response payload for the verify-signature command indicating which verifications the plugin performed and their outcomes.",
+      "required": ["verificationResults", "processedAttributes"],
+      "properties": {
+        "verificationResults": {
+          "type": "object",
+          "description": "Map of verification type to verification result. Each key is a capability type the plugin verified.",
+          "properties": {
+            "SIGNATURE_VERIFIER.TRUSTED_IDENTITY": {
+              "$ref": "#/$defs/VerificationResult"
+            },
+            "SIGNATURE_VERIFIER.REVOCATION_CHECK": {
+              "$ref": "#/$defs/VerificationResult"
+            }
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/VerificationResult"
+          }
+        },
+        "processedAttributes": {
+          "type": "array",
+          "description": "List of attribute names from unprocessedAttributes that the plugin consumed during verification.",
+          "items": {
+            "type": "string",
+            "description": "An attribute name that was processed by the plugin."
+          }
+        }
+      }
+    },
+    "VerificationResult": {
+      "type": "object",
+      "description": "The result of a single verification check performed by the plugin.",
+      "required": ["success"],
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the verification check passed."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Human-readable explanation of the verification result, especially on failure."
+        }
+      }
+    },
+    "PluginErrorResponse": {
+      "type": "object",
+      "description": "Error response written to stderr when a plugin command fails. The plugin exits with a non-zero exit code and writes this JSON to stderr.",
+      "required": ["errorCode"],
+      "properties": {
+        "errorCode": {
+          "type": "string",
+          "description": "Machine-readable error code identifying the type of failure.",
+          "enum": [
+            "VALIDATION_ERROR",
+            "UNSUPPORTED_CONTRACT_VERSION",
+            "ACCESS_DENIED",
+            "TIMEOUT",
+            "THROTTLED",
+            "ERROR"
+          ]
+        },
+        "errorMessage": {
+          "type": "string",
+          "description": "Human-readable error message describing what went wrong."
+        }
+      }
+    }
+  }
+}

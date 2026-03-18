@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://notaryproject.dev/schemas/trust-policy.json",
+  "title": "Notary Project Trust Policy",
+  "description": "Schema for the Notation trust policy document (trustpolicy.json). A trust policy specifies which OCI registries and artifacts are trusted for verification, which trust stores contain the valid signing certificates, and what signature verification level to apply. The trust policy is evaluated by Notation during the 'notation verify' operation to determine whether a signature on a container image or OCI artifact is acceptable.",
+  "type": "object",
+  "required": ["version", "trustPolicies"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Version of the trust policy document schema. Currently the only supported value is '1.0'.",
+      "const": "1.0"
+    },
+    "trustPolicies": {
+      "type": "array",
+      "description": "List of trust policy statements. Each statement applies to a set of registry scopes and defines the trust stores and verification level for matching artifacts. Statements are evaluated in order; the first matching statement is applied.",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/TrustPolicyStatement"
+      }
+    }
+  },
+  "$defs": {
+    "TrustPolicyStatement": {
+      "type": "object",
+      "description": "A single trust policy statement applying to one or more registry scopes. Defines the signing identity requirements, trust stores, and verification level for matching OCI artifacts.",
+      "required": ["name", "registryScopes", "signatureVerification"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+$",
+          "description": "Unique name identifying this trust policy statement within the policy document. Used in Notation output and log messages."
+        },
+        "registryScopes": {
+          "type": "array",
+          "description": "List of OCI registry scopes (repository references) this policy applies to. Use '*' as a wildcard to match any registry not matched by a more specific policy. Each entry is a registry host and optional repository path, e.g. 'myregistry.io/myrepo' or 'docker.io/library/ubuntu'.",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "description": "An OCI registry scope in the form '{registry}/{repository}' or the wildcard '*'.",
+            "examples": [
+              "*",
+              "myregistry.example.com/myapp",
+              "ghcr.io/myorg/myimage",
+              "docker.io/library/ubuntu"
+            ]
+          }
+        },
+        "signatureVerification": {
+          "$ref": "#/$defs/SignatureVerification"
+        },
+        "trustStores": {
+          "type": "array",
+          "description": "List of named trust stores to use when verifying signatures for artifacts matching this policy. Each entry references a trust store by type and name in the format '{type}:{name}'. Required unless signatureVerification.level is 'skip'.",
+          "items": {
+            "type": "string",
+            "pattern": "^(ca|signingAuthority):.+$",
+            "description": "Trust store reference in the format '{type}:{name}'. The type is either 'ca' for a CA certificate trust store or 'signingAuthority' for a signing authority trust store.",
+            "examples": [
+              "ca:acme-rockets",
+              "ca:wabbit-networks",
+              "signingAuthority:my-signing-authority"
+            ]
+          }
+        },
+        "trustedIdentities": {
+          "type": "array",
+          "description": "List of trusted signing identities that signatures must originate from. Use '*' to trust any identity from the configured trust stores. Otherwise specify X.509 subject DNs in the form 'x509.subject: {DN}' to restrict to specific certificate subjects.",
+          "items": {
+            "type": "string",
+            "description": "A trusted identity expression. Use '*' to allow any identity from the trust stores, or 'x509.subject: C=US, ST=WA, O=Acme Rockets' to restrict to a specific certificate subject DN.",
+            "examples": [
+              "*",
+              "x509.subject: C=US, ST=WA, O=Acme Rockets",
+              "x509.subject: C=US, O=wabbit-networks.io, CN=wabbit-networks.io"
+            ]
+          }
+        }
+      },
+      "if": {
+        "not": {
+          "properties": {
+            "signatureVerification": {
+              "properties": {
+                "level": {
+                  "const": "skip"
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "required": ["trustStores", "trustedIdentities"]
+      }
+    },
+    "SignatureVerification": {
+      "type": "object",
+      "description": "Configuration controlling how strictly signatures are verified for artifacts matching this trust policy statement.",
+      "required": ["level"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "description": "Verification strictness level. 'strict' enforces all verification requirements and treats any failure as an error. 'permissive' logs failures for non-critical checks but still enforces critical ones. 'audit' logs all failures without blocking. 'skip' bypasses all signature verification entirely for the matching scopes.",
+          "enum": ["strict", "permissive", "audit", "skip"]
+        },
+        "override": {
+          "type": "object",
+          "description": "Per-check overrides that allow specific verification checks to be set to 'enforced', 'logged', or 'skipped' independently of the base level. This enables fine-grained control over individual verification requirements.",
+          "properties": {
+            "expiry": {
+              "$ref": "#/$defs/VerificationAction",
+              "description": "Override for signature expiry checking. A signature has expired if its signed timestamp exceeds the notBefore/notAfter bounds of the signing certificate."
+            },
+            "authenticTimestamp": {
+              "$ref": "#/$defs/VerificationAction",
+              "description": "Override for authentic timestamp checking. Verifies that a trusted timestamp countersignature is present in the signature."
+            },
+            "revocation": {
+              "$ref": "#/$defs/VerificationAction",
+              "description": "Override for certificate revocation checking via OCSP or CRL."
+            }
+          }
+        }
+      }
+    },
+    "VerificationAction": {
+      "type": "string",
+      "description": "The action to take when a specific verification check fails. 'enforced' treats the failure as an error and blocks verification. 'logged' records the failure but allows verification to proceed. 'skipped' disables the check entirely.",
+      "enum": ["enforced", "logged", "skipped"]
+    }
+  }
+}

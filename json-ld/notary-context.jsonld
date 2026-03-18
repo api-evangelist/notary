@@ -1,0 +1,152 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "notary": "https://notaryproject.dev/vocab#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "sec": "https://w3id.org/security#",
+    "oci": "https://opencontainers.org/schema#",
+    "spdx": "https://spdx.org/rdf/terms#",
+
+    "Signature": "notary:Signature",
+    "TrustPolicy": "notary:TrustPolicy",
+    "TrustPolicyStatement": "notary:TrustPolicyStatement",
+    "TrustStore": "notary:TrustStore",
+    "Plugin": "notary:Plugin",
+    "Artifact": "notary:Artifact",
+    "CertificateChain": "sec:CertificateChain",
+
+    "name": {
+      "@id": "schema:name",
+      "@type": "xsd:string"
+    },
+    "description": {
+      "@id": "schema:description",
+      "@type": "xsd:string"
+    },
+    "version": {
+      "@id": "schema:softwareVersion",
+      "@type": "xsd:string"
+    },
+    "url": {
+      "@id": "schema:url",
+      "@type": "@id"
+    },
+
+    "trustPolicies": {
+      "@id": "notary:trustPolicies",
+      "@container": "@set"
+    },
+    "registryScopes": {
+      "@id": "notary:registryScopes",
+      "@container": "@set"
+    },
+    "signatureVerification": {
+      "@id": "notary:signatureVerification"
+    },
+    "trustStores": {
+      "@id": "notary:trustStores",
+      "@container": "@set"
+    },
+    "trustedIdentities": {
+      "@id": "notary:trustedIdentities",
+      "@container": "@set"
+    },
+    "level": {
+      "@id": "notary:verificationLevel",
+      "@type": "xsd:string"
+    },
+    "override": {
+      "@id": "notary:verificationOverride"
+    },
+
+    "keyId": {
+      "@id": "notary:keyId",
+      "@type": "xsd:string"
+    },
+    "keySpec": {
+      "@id": "notary:keySpec",
+      "@type": "xsd:string"
+    },
+    "hashAlgorithm": {
+      "@id": "sec:digestAlgorithm",
+      "@type": "xsd:string"
+    },
+    "signingAlgorithm": {
+      "@id": "sec:signatureAlgorithm",
+      "@type": "xsd:string"
+    },
+    "certificateChain": {
+      "@id": "sec:x509Certificate",
+      "@container": "@list"
+    },
+    "signature": {
+      "@id": "sec:signatureValue",
+      "@type": "xsd:base64Binary"
+    },
+    "payload": {
+      "@id": "notary:payload",
+      "@type": "xsd:base64Binary"
+    },
+
+    "capabilities": {
+      "@id": "notary:capabilities",
+      "@container": "@set"
+    },
+    "supportedContractVersions": {
+      "@id": "notary:supportedContractVersions",
+      "@container": "@set"
+    },
+    "contractVersion": {
+      "@id": "notary:contractVersion",
+      "@type": "xsd:string"
+    },
+
+    "mediaType": {
+      "@id": "dcterms:format",
+      "@type": "xsd:string"
+    },
+    "digest": {
+      "@id": "oci:digest",
+      "@type": "xsd:string"
+    },
+    "size": {
+      "@id": "schema:contentSize",
+      "@type": "xsd:integer"
+    },
+    "annotations": {
+      "@id": "notary:annotations"
+    },
+    "artifactReference": {
+      "@id": "notary:artifactReference",
+      "@type": "@id"
+    },
+
+    "success": {
+      "@id": "notary:verificationSuccess",
+      "@type": "xsd:boolean"
+    },
+    "reason": {
+      "@id": "notary:verificationReason",
+      "@type": "xsd:string"
+    },
+    "errorCode": {
+      "@id": "notary:errorCode",
+      "@type": "xsd:string"
+    },
+    "errorMessage": {
+      "@id": "schema:error",
+      "@type": "xsd:string"
+    },
+
+    "created": {
+      "@id": "dcterms:created",
+      "@type": "xsd:date"
+    },
+    "modified": {
+      "@id": "dcterms:modified",
+      "@type": "xsd:date"
+    }
+  }
+}
