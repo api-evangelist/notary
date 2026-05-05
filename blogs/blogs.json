@@ -1,0 +1,13 @@
+{
+  "repo": "notary",
+  "feeds": [
+    {
+      "source": "https://notaryproject.dev/blog/",
+      "feed_url": "https://notaryproject.dev/blog/index.xml",
+      "saved": 10,
+      "title": "Notary Project | A set of specifications and tools intended to provide a cross-industry standard for securing software supply chains. \u2013 Blog"
+    }
+  ],
+  "post_count": 10,
+  "fetched": "2026-05-03T23:32:44Z"
+}

@@ -1,0 +1,19 @@
+---
+title: "Blog: VMware Tanzu Application Catalog now uses Notation for signing and verifying OCI artifacts"
+url: "https://notaryproject.dev/blog/2023/vmware-tanzu-application-catalog-using-notation/"
+date: "Tue, 19 Dec 2023 00:00:00 +0000"
+author: ""
+feed_url: "https://notaryproject.dev/blog/index.xml"
+---
+<p><a href="https://tanzu.vmware.com/application-catalog" rel="noopener" target="_blank">VMware Tanzu Application Catalog</a>, the enterprise edition of <a href="https://bitnami.com/" rel="noopener" target="_blank">Bitnami Application Catalog</a>, now leverages <a href="https://github.com/notaryproject/notation" rel="noopener" target="_blank">Notation</a> as a tool for signing and verifying open container initiative (OCI) artifacts (e.g. container images, Helm charts, and metadata bundles).</p>
+<p>Tanzu Application Catalog enables enterprises to build their own private catalog of custom-packaged open source application components that are continuously maintained and verifiably tested for use in production environments. Built by leveraging Bitnami’s expertise in packaging hundreds of open source software applications and delivering them to millions of developers, Tanzu Application Catalog aims to address the open source software needs of enterprises by providing them with customized ready-to-deploy open source applications along with extensive metadata for efficient risk assessment.</p>
+<p>With this integration, Notation plays a key role in Tanzu Application Catalog’s mission of making open source software enterprise ready.</p>
+<h2 id="what-tanzu-application-catalog-achieves-by-using-notation">What Tanzu Application Catalog achieves by using Notation</h2>
+<ul>
+<li><strong>Ensure content integrity</strong>: By signing their OCI artifacts using Notation, Tanzu Application Catalog team can help ensure the integrity of the OCI artifacts they deliver to their customers. Tanzu team uses Notation to sign their OCI artifacts, creating a unique fingerprint for each version of the artifact. Any tampering with the OCI artifact will result in a failed verification, alerting users to potential security threats.</li>
+<li><strong>Verify authenticity</strong>: Knowing the source of OCI artifacts is crucial for security and compliance of enterprises. Notation, a client from the Notary Project, helps generate cryptographic signatures to verify artifact authenticity by validating signer&rsquo;s cryptographic identity. Validation helps ensures that the signed applications are built by trusted sources, i.e. Tanzu Application Catalog in this case, reducing the risk of deploying unapproved software.</li>
+<li><strong>Interoperability across tools and platforms</strong>: Notary Project along with its client tool Notation has standardized signature format. This standardization enables interoperability across different tools, registries, container orchestrators, and platforms that support the OCI image format.</li>
+</ul>
+<p>Thus, Notation, with its standards-based tooling for signing and verifying artifacts, helps Tanzu Application Catalog achieve improved security while delivering compliant open source software artifacts for mission critical production use cases.</p>
+<p>To read more about how Tanzu Application Catalog leverages Notation, check out <a href="https://tanzu.vmware.com/content/vmware-application-catalog-resources/tanzu-application-catalog-leverages-notation" rel="noopener" target="_blank">this blog</a>.</p>
+<p>If you are interested in learning more about Tanzu Application Catalog, check out their <a href="https://tanzu.vmware.com/application-catalog" rel="noopener" target="_blank">product webpage</a> and <a href="https://tanzu.vmware.com/content/vmware-application-catalog-resources/jun-23-boost-developer-productivity-and-operator-confidence-with-secure-open-source-components" rel="noopener" target="_blank">additional resources</a>.</p>
