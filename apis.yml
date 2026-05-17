@@ -60,13 +60,13 @@ apis:
     properties:
       - type: Documentation
         url: https://notaryproject.dev/docs/user-guides/installation/cli/
-      - type: Getting Started
+      - type: GettingStarted
         url: https://notaryproject.dev/docs/user-guides/installation/
       - type: Reference
         url: https://github.com/notaryproject/notation/blob/main/specs/notation-cli.md
       - type: GitHubRepository
         url: https://github.com/notaryproject/notation
-      - type: Change Log
+      - type: ChangeLog
         url: https://github.com/notaryproject/notation/releases
     tags:
       - CLI
@@ -124,7 +124,7 @@ common:
     url: https://notaryproject.dev
   - type: Documentation
     url: https://notaryproject.dev/docs/
-  - type: Getting Started
+  - type: GettingStarted
     url: https://notaryproject.dev/docs/user-guides/installation/
   - type: Blog
     url: https://notaryproject.dev/blog/
@@ -134,7 +134,7 @@ common:
     url: https://github.com/notaryproject
   - type: GitHubRepository
     url: https://github.com/notaryproject/notation
-  - type: Change Log
+  - type: ChangeLog
     url: https://github.com/notaryproject/notation/releases
   - type: JSONSchema
     url: json-schema/notary-trust-policy-schema.json
@@ -144,7 +144,7 @@ common:
     url: json-schema/notary-plugin-protocol-schema.json
   - type: JSONSchema
     url: json-schema/notary-signature-envelope-schema.json
-  - type: JSON-LD
+  - type: JSONLD
     url: json-ld/notary-context.jsonld
 maintainers:
   - FN: Kin Lane
