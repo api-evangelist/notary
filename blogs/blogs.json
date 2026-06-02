@@ -2,12 +2,20 @@
   "repo": "notary",
   "feeds": [
     {
-      "source": "https://notaryproject.dev/blog/",
+      "source": "https://notaryproject.dev/blog/index.xml",
       "feed_url": "https://notaryproject.dev/blog/index.xml",
-      "title": "Notary Project | A set of specifications and tools intended to provide a cross-industry standard for securing software supply chains. \u2013 Blog",
-      "saved": 15
+      "title": "",
+      "saved": 0,
+      "method": "feed"
+    },
+    {
+      "source": "https://notaryproject.dev/docs/user-guides/installation/",
+      "feed_url": "https://notaryproject.dev/docs/user-guides/installation/index.xml",
+      "title": "",
+      "saved": 0,
+      "method": "discovered"
     }
   ],
   "post_count": 25,
-  "fetched": "2026-05-17T20:20:35Z"
+  "fetched": "2026-06-01T23:35:02Z"
 }
