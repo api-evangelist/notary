@@ -8,7 +8,7 @@ description: >-
   formats, trust policies, and verification workflows to secure software
   supply chains.
 url: https://notaryproject.dev
-image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
 tags:
   - Cloud Native
   - Container Security
@@ -31,7 +31,7 @@ apis:
       specification enables end-to-end supply chain security from build to
       deployment.
     humanURL: https://notaryproject.dev/docs/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://notaryproject.dev/docs/
@@ -56,7 +56,7 @@ apis:
       trust stores, configuring trust policies for verification, and extends
       to third-party key management systems via a plugin model.
     humanURL: https://notaryproject.dev/docs/user-guides/installation/cli/
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://notaryproject.dev/docs/user-guides/installation/cli/
@@ -82,7 +82,7 @@ apis:
       applications to integrate artifact signing and verification into their
       own workflows without invoking the CLI directly.
     humanURL: https://github.com/notaryproject/notation-go
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://pkg.go.dev/github.com/notaryproject/notation-go
@@ -102,7 +102,7 @@ apis:
       Notation to work with hardware security modules, cloud key management
       services, and other external credential systems.
     humanURL: https://github.com/notaryproject/specifications/blob/main/specs/plugin-extensibility.md
-    image: https://kinlane-productions2.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+    image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
     properties:
       - type: Documentation
         url: https://github.com/notaryproject/specifications/blob/main/specs/plugin-extensibility.md
