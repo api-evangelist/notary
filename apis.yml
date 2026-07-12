@@ -120,6 +120,8 @@ apis:
       - Plugin
       - Signing
 common:
+  - type: DomainSecurity
+    url: security/notary-domain-security.yml
   - type: Website
     url: https://notaryproject.dev
   - type: Documentation
