@@ -148,6 +148,11 @@ apis:
     tags:
       - Extensibility
       - Key Management
+      - Plugins
+      - Signing
+    tags_raw:
+      - Extensibility
+      - Key Management
       - Plugin
       - Signing
 common:
